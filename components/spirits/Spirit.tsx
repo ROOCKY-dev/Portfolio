@@ -20,12 +20,6 @@ const COLORS = {
   panic: '#FF4500'
 };
 
-const MOOD_GLOW = {
-  calm: '0 0 10px #00FFFF, 0 0 20px rgba(0, 255, 255, 0.2)',
-  working: '0 0 15px #00FF00, 0 0 25px rgba(0, 255, 0, 0.3)',
-  panic: '0 0 20px #FF4500, 0 0 30px rgba(255, 69, 0, 0.4)'
-};
-
 export default function Spirit({
   mood = 'calm',
   behavior = 'idle',
@@ -37,7 +31,6 @@ export default function Spirit({
 }: SpiritProps) {
 
   const color = COLORS[mood];
-  const glow = MOOD_GLOW[mood];
 
   // -- Animation Variants --
 
@@ -69,6 +62,31 @@ export default function Spirit({
     typing: {
         x: [-1, 1, -1],
         transition: { repeat: Infinity, duration: 0.1, delay }
+    }
+  };
+
+  // Glow Animation based on Mood
+  const glowVariants: Variants = {
+    calm: {
+      boxShadow: [
+        `0 0 5px ${COLORS.calm}`,
+        `0 0 12px ${COLORS.calm}`,
+        `0 0 5px ${COLORS.calm}`
+      ],
+      transition: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+    },
+    working: {
+      boxShadow: `0 0 10px ${COLORS.working}`, // Steady bright
+      transition: { duration: 0.5 }
+    },
+    panic: {
+      boxShadow: [
+        `0 0 10px ${COLORS.panic}`,
+        `0 0 25px ${COLORS.panic}`,
+        `0 0 12px ${COLORS.panic}`,
+        `0 0 20px ${COLORS.panic}`
+      ],
+      transition: { repeat: Infinity, duration: 0.1, ease: "linear" } // Rapid erratic
     }
   };
 
@@ -184,14 +202,15 @@ export default function Spirit({
         <div className="absolute -bottom-[6px] right-[4px] w-[4px] h-[7px] bg-inherit rounded-sm" style={{ backgroundColor: color }} />
 
         {/* Torso */}
-        <div
+        <motion.div
           style={{
             width: size,
             height: size * 1.125, // 24x27 approx
             backgroundColor: color,
-            boxShadow: glow
           }}
           className="relative rounded-[2px] flex justify-center items-center pt-1"
+          animate={mood}
+          variants={glowVariants}
         >
            {/* Eyes */}
            <div className="flex gap-[4px]">
@@ -206,7 +225,7 @@ export default function Spirit({
                 variants={eyeVariants}
               />
            </div>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
