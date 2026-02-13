@@ -1,21 +1,16 @@
 'use client';
 
 import { useOrb } from './OrbContext';
-import { useMinions } from '@/components/spirits/MinionContext';
 import { Settings, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function OrbControls() {
   const { errorCount, setErrorCount, status } = useOrb();
-  const { clearMinions } = useMinions();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Removed Minion interaction for Phase 3
   const handleClear = () => {
-      clearMinions();
-      // Wait for cheer animation before resetting
-      setTimeout(() => {
-          setErrorCount(0);
-      }, 1500);
+      setErrorCount(0);
   };
 
   return (
@@ -52,7 +47,7 @@ export default function OrbControls() {
                     <span className="text-white/50 uppercase">System Status</span>
                     <span className={`font-bold uppercase tracking-wider ${
                         status === 'stable' ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]' :
-                        status === 'warning' ? 'text-green-400 drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]' :
+                        status === 'warning' ? 'text-orange-400 drop-shadow-[0_0_5px_rgba(255,165,0,0.5)]' :
                         'text-red-500 drop-shadow-[0_0_5px_rgba(255,0,0,0.5)]'
                     }`}>
                         {status === 'stable' ? 'IDLE' : status === 'warning' ? 'WORKING' : 'CRITICAL'}
