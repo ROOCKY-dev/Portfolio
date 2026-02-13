@@ -1,7 +1,6 @@
 'use client';
 
-import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
-import { MouseEvent } from 'react';
+import { motion } from 'framer-motion';
 
 export default function SpotlightCard({
     children,
@@ -10,33 +9,25 @@ export default function SpotlightCard({
     children: React.ReactNode,
     className?: string
 }) {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
-
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-8 shadow-2xl ${className}`}
-      onMouseMove={handleMouseMove}
+      className={`group relative overflow-hidden rounded-xl border border-white/5 bg-white/5 p-8 shadow-2xl transition-colors duration-500 hover:border-white/20 ${className}`}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover:opacity-100"
+      {/* Dynamic Global Spotlight Layer */}
+      {/* Uses CSS variables set by LightManager for performance */}
+      <div
+        className="pointer-events-none absolute -inset-px transition duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100"
         style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(255, 255, 255, 0.1),
-              transparent 80%
-            )
-          `,
+          background: `radial-gradient(
+            600px circle at var(--mouse-x) var(--mouse-y),
+            rgba(255, 255, 255, 0.1),
+            transparent 40%
+          )`,
         }}
       />
-      <div className="relative">
+
+      {/* Content */}
+      <div className="relative z-10">
         {children}
       </div>
     </div>

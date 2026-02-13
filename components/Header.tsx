@@ -15,7 +15,7 @@ export default function Header() {
 
   const statusText = {
     stable: 'OPERATIONAL',
-    warning: 'WORKING',
+    warning: 'STRESSED',
     critical: 'CRITICAL FAILURE'
   };
 
@@ -34,60 +34,52 @@ export default function Header() {
 
   return (
     <>
-        {/* Background Orb - Floating in Top-Left */}
-        <div className="fixed top-0 left-0 w-[400px] h-[400px] z-0 pointer-events-none -translate-x-1/4 -translate-y-1/4 opacity-80 mix-blend-screen">
+        {/* Background Orb - Living Heart (3x Larger, Z-index 0) */}
+        {/* Positioned deeper in top-left to float behind text */}
+        <div className="fixed top-[-10%] left-[-10%] w-[80vw] h-[80vw] max-w-[1000px] max-h-[1000px] z-0 pointer-events-none opacity-100 mix-blend-screen">
             <StatusOrb />
         </div>
 
         <header className="fixed top-0 left-0 w-full flex items-start justify-between p-6 sm:p-8 z-30 pointer-events-none font-mono text-xs">
 
-          {/* Left: Console Overlay (Floating over Orb) */}
-          <div className="flex flex-col gap-2 mt-8 ml-8 sm:mt-12 sm:ml-12 pointer-events-auto backdrop-blur-[2px] rounded-lg p-2 bg-black/20 border border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-            <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full inline-block shadow-[0_0_8px_currentColor] ${dotColor[status]} ${status === 'critical' ? 'animate-pulse' : ''}`} />
-                <span className={`${statusColor[status]} font-bold tracking-widest text-sm transition-colors duration-1000`}>
-                    {statusText[status]}
-                </span>
+          {/* Left: Identity & Mission (Overlaying the Orb) */}
+          <div className="flex flex-col gap-4 mt-8 ml-4 sm:mt-12 sm:ml-12 pointer-events-auto backdrop-blur-[2px] rounded-lg p-4 bg-black/10 border border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] max-w-sm">
+
+            {/* Identity */}
+            <div className="flex flex-col">
+                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Identity</span>
+                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md">
+                    ROOCKYdev
+                </h1>
             </div>
 
-            <div className="text-[10px] text-white/50 uppercase tracking-wider flex flex-col gap-0.5">
-                <span>System: Online</span>
-                <span>Latency: 12ms</span>
+            {/* Status */}
+            <div className="flex flex-col">
+                 <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Status</span>
+                 <div className="flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${dotColor[status]} ${status === 'critical' ? 'animate-pulse' : ''} shadow-[0_0_8px_currentColor]`} />
+                    <span className="text-white/90 font-medium">Building Digital Ecosystems</span>
+                 </div>
             </div>
+
+            {/* Mission */}
+            <div className="flex flex-col">
+                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Mission</span>
+                <span className="text-cyan-400/90 font-medium">Scholarship Candidate (NL/DE/CN)</span>
+            </div>
+
           </div>
 
-          {/* Right: User Console Details */}
-          <div className="flex flex-col items-end gap-4 pointer-events-auto">
-             <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-2 text-white/70">
-                    <Terminal size={12} className="text-cyan-400" />
-                    <span className="font-bold tracking-wide text-white">$ whoami</span>
-                </div>
-                <span className="text-white/90 font-bold text-sm">ROOCKYdev</span>
+          {/* Right: Technical Metrics (Kept minimal) */}
+          <div className="flex flex-col items-end gap-2 pointer-events-auto text-[10px] text-white/30 hidden sm:flex">
+             <div className="flex items-center gap-1.5">
+                <Cpu size={10} />
+                <span>Next.js 15 / R3F / Tailwind</span>
              </div>
-
-             <div className="flex flex-col items-end gap-1 text-[10px] text-white/50">
-                <div className="flex items-center gap-1.5">
-                    <Activity size={10} />
-                    <span>$ cat status.txt</span>
-                    <span className="text-cyan-400 font-mono animate-pulse ml-1">
-                        {status === 'critical' ? '"PANIC!"' : status === 'warning' ? '"Compiling..."' : '"Ready"'}
-                    </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                    <AlertTriangle size={10} />
-                    <span>Errors:</span>
-                    <span className={`font-bold transition-all duration-300 ${errorCount > 0 ? 'text-red-500 scale-110' : 'text-white'}`}>
-                        {errorCount}
-                    </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                    <Cpu size={10} />
-                    <span>Task: Portfolio_V2</span>
-                </div>
-            </div>
+             <div className="flex items-center gap-1.5">
+                <Activity size={10} />
+                <span>Errors: <span className={errorCount > 0 ? "text-red-500" : "text-white/50"}>{errorCount}</span></span>
+             </div>
           </div>
         </header>
     </>
