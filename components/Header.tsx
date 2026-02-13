@@ -15,14 +15,20 @@ export default function Header() {
 
   const statusText = {
     stable: 'OPERATIONAL',
-    warning: 'UNSTABLE',
+    warning: 'WORKING',
     critical: 'CRITICAL FAILURE'
   };
 
   const statusColor = {
-    stable: 'text-green-500',
-    warning: 'text-orange-400',
-    critical: 'text-red-500'
+    stable: 'text-cyan-400 drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]',
+    warning: 'text-green-400 drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]',
+    critical: 'text-red-500 drop-shadow-[0_0_5px_rgba(255,0,0,0.5)]'
+  };
+
+  const dotColor = {
+      stable: 'bg-cyan-400',
+      warning: 'bg-green-400',
+      critical: 'bg-red-500'
   };
 
   return (
@@ -39,8 +45,8 @@ export default function Header() {
           <span className="text-[10px] text-white/50 uppercase tracking-wider">System Status</span>
           <span className={`${statusColor[status]} font-bold flex items-center gap-1 transition-colors duration-500`}>
             <span className={`w-1.5 h-1.5 rounded-full inline-block shadow-[0_0_5px_currentColor]
-              ${status === 'stable' ? 'bg-green-500' : status === 'warning' ? 'bg-orange-400' : 'bg-red-500'}
-              ${status !== 'stable' ? 'animate-pulse' : ''}`}
+              ${dotColor[status]}
+              ${status === 'critical' ? 'animate-pulse' : ''}`}
             />
             {statusText[status]}
           </span>

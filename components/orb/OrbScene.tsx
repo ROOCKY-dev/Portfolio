@@ -45,13 +45,16 @@ export default function OrbScene() {
 
   useEffect(() => {
       const planetCount = Math.min(3 + errorCount, 20);
-      const newPlanets = new Array(planetCount).fill(0).map((_, i) => ({
-        orbitRadius: 1.4 + Math.random() * 0.6,
-        speed: (Math.random() * 0.5 + 0.5) * (i % 2 === 0 ? 1 : -1),
-        axis: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI] as [number, number, number],
-        id: i
-      }));
-      setPlanets(newPlanets);
+      const timer = setTimeout(() => {
+          const newPlanets = new Array(planetCount).fill(0).map((_, i) => ({
+            orbitRadius: 1.4 + Math.random() * 0.6,
+            speed: (Math.random() * 0.5 + 0.5) * (i % 2 === 0 ? 1 : -1),
+            axis: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI] as [number, number, number],
+            id: i
+          }));
+          setPlanets(newPlanets);
+      }, 0);
+      return () => clearTimeout(timer);
   }, [errorCount]);
 
   return (
