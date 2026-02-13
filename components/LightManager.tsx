@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
 import { SwitchCamera } from 'lucide-react';
-import { useMinions } from '@/components/spirits/MinionContext';
+// import { useMinions } from '@/components/spirits/MinionContext';
 
 export default function LightManager() {
   const [isRevealed, setIsRevealed] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  const { spawnDefenders } = useMinions();
+//   const { spawnDefenders } = useMinions();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -61,21 +61,15 @@ export default function LightManager() {
     const maxDim = Math.max(windowSize.width, windowSize.height) * 1.5;
     const targetRadius = newState ? maxDim : 0;
 
-    // 10 seconds duration as requested
+    // Use EaseOut for "Fast start, slow finish"
     animate(revealRadius, targetRadius, {
-      duration: 10,
-      ease: "easeInOut",
+      duration: 3, // Faster than 10s for responsiveness
+      ease: "circOut", // Strong ease out
     });
   };
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-      // Get exact coordinates of the button
-      const rect = e.currentTarget.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      // Spawn defenders around the switch
-      spawnDefenders(centerX, centerY);
+  const handleMouseEnter = () => {
+      // Defenders disabled for Phase 3
   };
 
   // Switch Position: Fixed Top-Right (approx 80px from top, 50px from right)
@@ -92,7 +86,7 @@ export default function LightManager() {
         className="fixed top-20 right-4 z-50 p-2 border border-white/20 bg-black text-white hover:bg-white/10 hover:border-white transition-all rounded-sm flex items-center gap-2 group cursor-pointer"
         aria-label="Toggle Global Light"
       >
-        <SwitchCamera size={16} className={isRevealed ? "text-green-400" : "text-white/50"} />
+        <SwitchCamera size={16} className={isRevealed ? "text-cyan-400" : "text-white/50"} />
         <span className="text-[10px] font-mono uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">
           {isRevealed ? "Darken" : "Illu-minate"}
         </span>
@@ -111,8 +105,13 @@ export default function LightManager() {
       {/* SVG Mask Definition */}
       <svg className="fixed inset-0 pointer-events-none z-0 opacity-0 w-full h-full">
         <defs>
-          <filter id="blur-filter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+          <filter id="soft-blur">
+            {/* Increase deviation for softer gradient edges */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
+          </filter>
+
+           <filter id="global-blur">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="100" />
           </filter>
 
           <mask id="light-mask">
@@ -121,21 +120,24 @@ export default function LightManager() {
 
             {/* Black Circle = Transparent Overlay (Revealed Content) */}
 
-            {/* Flashlight Hole */}
+            {/* Flashlight Hole - Soft Radial Gradient */}
+            {/* We use a circle with a blur filter to simulate gradient mask */}
             <motion.circle
               cx={smoothX}
               cy={smoothY}
-              r="150"
+              r="250" // Larger radius for falloff
               fill="black"
-              filter="url(#blur-filter)"
+              filter="url(#soft-blur)"
+              opacity={0.9} // Slight opacity to never fully reveal unless direct
             />
 
-            {/* Global Reveal Hole */}
+            {/* Global Reveal Hole - Bleeding Light */}
             <motion.circle
               cx={switchX}
               cy={switchY}
               r={revealRadius}
               fill="black"
+              filter="url(#global-blur)" // Very soft edge for global light
             />
           </mask>
         </defs>
