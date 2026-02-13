@@ -9,6 +9,7 @@ interface SpiritProps {
   behavior?: SpiritBehavior;
   size?: number; // Base width, height will be scaled
   carrying?: React.ReactNode;
+  tooltip?: string;
   className?: string;
   delay?: number;
 }
@@ -31,6 +32,7 @@ export default function Spirit({
   size = 24,
   carrying,
   className = '',
+  tooltip,
   delay = 0
 }: SpiritProps) {
 
@@ -131,6 +133,18 @@ export default function Spirit({
 
   return (
     <div className={`relative flex flex-col items-center justify-end ${className}`} style={{ width: size, height: size * 1.5 }}> {/* Container includes space for item */}
+
+      {/* Tooltip */}
+      {tooltip && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -top-16 z-20 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-sm whitespace-nowrap pointer-events-none drop-shadow-[0_0_5px_rgba(255,0,0,0.8)]"
+        >
+          {tooltip}
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-600 rotate-45" />
+        </motion.div>
+      )}
 
       {/* Carried Item */}
       {carrying && (

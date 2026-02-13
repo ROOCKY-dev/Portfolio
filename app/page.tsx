@@ -29,14 +29,10 @@ export default function Home() {
     } else {
       document.body.style.overflow = 'auto';
     }
-  }, [isLoading]);
 
-  // Simulate loading completion since we removed the sequence
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => setIsLoading(false), 500);
-      return () => clearTimeout(timer);
-    }
+    // Simulating load complete since we removed the LoadingSequence for now
+    const loadTimer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(loadTimer);
   }, [isLoading]);
 
   if (!isMounted) return null; // Avoid hydration mismatch for client-heavy app
@@ -45,11 +41,14 @@ export default function Home() {
     <OrbProvider>
       {/* <MinionProvider> */}
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black relative">
-          {/* <AnimatePresence mode='wait'>
+          <AnimatePresence mode='wait'>
             {isLoading && (
-              <LoadingSequence key="loader" onComplete={() => setIsLoading(false)} />
+               // <LoadingSequence key="loader" onComplete={() => setIsLoading(false)} />
+               <div key="simple-loader" className="fixed inset-0 bg-black z-50 flex items-center justify-center text-white/20 font-mono text-xs animate-pulse">
+                   INITIALIZING...
+               </div>
             )}
-          </AnimatePresence> */}
+          </AnimatePresence>
 
           {/* Main Content */}
           {/* <MinionSpawner /> */}

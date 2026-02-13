@@ -8,14 +8,14 @@ import { SwitchCamera } from 'lucide-react';
 export default function LightManager() {
   const [isRevealed, setIsRevealed] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-//   const { spawnDefenders } = useMinions();
+  // const { spawnDefenders } = useMinions();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
   // Smooth mouse movement for flashlight
-  const smoothX = useSpring(mouseX, { stiffness: 500, damping: 50 });
-  const smoothY = useSpring(mouseY, { stiffness: 500, damping: 50 });
+  const smoothX = useSpring(mouseX, { stiffness: 150, damping: 30 }); // Softer spring for "floaty" feel
+  const smoothY = useSpring(mouseY, { stiffness: 150, damping: 30 });
 
   // Reveal radius animation
   const revealRadius = useMotionValue(0);
@@ -45,6 +45,10 @@ export default function LightManager() {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
+
+      // Update CSS variables for global "excitement" effect
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -63,19 +67,19 @@ export default function LightManager() {
 
     // Use EaseOut for "Fast start, slow finish"
     animate(revealRadius, targetRadius, {
-      duration: 3, // Faster than 10s for responsiveness
-      ease: "circOut", // Strong ease out
+      duration: 2.5, // Slower, more atmospheric
+      ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for "ink in water" feel
     });
-  };
-
-  const handleMouseEnter = () => {
-      // Defenders disabled for Phase 3
   };
 
   // Switch Position: Fixed Top-Right (approx 80px from top, 50px from right)
   // Matched with CSS positioning
   const switchX = windowSize.width - 50;
   const switchY = 80;
+
+  const handleMouseEnter = () => {
+      // spawnDefenders(switchX, switchY);
+  };
 
   return (
     <>
@@ -106,12 +110,13 @@ export default function LightManager() {
       <svg className="fixed inset-0 pointer-events-none z-0 opacity-0 w-full h-full">
         <defs>
           <filter id="soft-blur">
-            {/* Increase deviation for softer gradient edges */}
-            <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
+            {/* Soft Radial Gradient for Flashlight */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
           </filter>
 
            <filter id="global-blur">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="100" />
+             {/* Ink-bleed effect for Global Reveal */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
           </filter>
 
           <mask id="light-mask">
@@ -121,14 +126,13 @@ export default function LightManager() {
             {/* Black Circle = Transparent Overlay (Revealed Content) */}
 
             {/* Flashlight Hole - Soft Radial Gradient */}
-            {/* We use a circle with a blur filter to simulate gradient mask */}
             <motion.circle
               cx={smoothX}
               cy={smoothY}
-              r="250" // Larger radius for falloff
+              r="300" // Larger flashlight
               fill="black"
               filter="url(#soft-blur)"
-              opacity={0.9} // Slight opacity to never fully reveal unless direct
+              opacity={0.8} // Never fully transparent, maintains atmosphere
             />
 
             {/* Global Reveal Hole - Bleeding Light */}
