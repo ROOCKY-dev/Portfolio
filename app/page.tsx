@@ -4,14 +4,14 @@ import Header from '@/components/Header';
 import Body from '@/components/Body';
 import LightManager from '@/components/LightManager';
 import { OrbProvider } from '@/components/orb/OrbContext';
-// import { MinionProvider } from '@/components/spirits/MinionContext';
-// import MinionSpawner from '@/components/spirits/MinionSpawner';
+import { MinionProvider } from '@/components/spirits/MinionContext';
+import MinionSpawner from '@/components/spirits/MinionSpawner';
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
 const OrbControls = dynamic(() => import('@/components/orb/OrbControls'), { ssr: false });
-// const LoadingSequence = dynamic(() => import('@/components/spirits/LoadingSequence'), { ssr: false });
+const LoadingSequence = dynamic(() => import('@/components/spirits/LoadingSequence'), { ssr: false });
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,34 +31,26 @@ export default function Home() {
     }
   }, [isLoading]);
 
-  // Simulate loading completion since we removed the sequence
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => setIsLoading(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
   if (!isMounted) return null; // Avoid hydration mismatch for client-heavy app
 
   return (
     <OrbProvider>
-      {/* <MinionProvider> */}
+      <MinionProvider>
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black relative">
-          {/* <AnimatePresence mode='wait'>
+          <AnimatePresence mode='wait'>
             {isLoading && (
               <LoadingSequence key="loader" onComplete={() => setIsLoading(false)} />
             )}
-          </AnimatePresence> */}
+          </AnimatePresence>
 
           {/* Main Content */}
-          {/* <MinionSpawner /> */}
+          <MinionSpawner />
           <LightManager />
           <Header />
           <Body />
           <OrbControls />
         </div>
-      {/* </MinionProvider> */}
+      </MinionProvider>
     </OrbProvider>
   );
 }

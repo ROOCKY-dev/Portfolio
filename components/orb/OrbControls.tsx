@@ -1,16 +1,20 @@
 'use client';
 
 import { useOrb } from './OrbContext';
+import { useMinions } from '@/components/spirits/MinionContext';
 import { Settings, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function OrbControls() {
   const { errorCount, setErrorCount, status } = useOrb();
+  const { clearMinions } = useMinions();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Removed Minion interaction for Phase 3
   const handleClear = () => {
-      setErrorCount(0);
+      clearMinions();
+      setTimeout(() => {
+          setErrorCount(0);
+      }, 1500);
   };
 
   return (

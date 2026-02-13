@@ -46,6 +46,7 @@ export default function MinionSpawner() {
                         mood={minion.mood}
                         behavior={minion.behavior}
                         size={24}
+                        tooltip={minion.tooltip}
                     />
                 </motion.div>
             ))}

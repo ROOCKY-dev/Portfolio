@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
 import { SwitchCamera } from 'lucide-react';
-// import { useMinions } from '@/components/spirits/MinionContext';
+import { useMinions } from '@/components/spirits/MinionContext';
 
 export default function LightManager() {
   const [isRevealed, setIsRevealed] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-//   const { spawnDefenders } = useMinions();
+  const { spawnDefenders } = useMinions();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -68,14 +68,14 @@ export default function LightManager() {
     });
   };
 
-  const handleMouseEnter = () => {
-      // Defenders disabled for Phase 3
-  };
-
   // Switch Position: Fixed Top-Right (approx 80px from top, 50px from right)
   // Matched with CSS positioning
   const switchX = windowSize.width - 50;
   const switchY = 80;
+
+  const handleMouseEnter = () => {
+      spawnDefenders(switchX, switchY);
+  };
 
   return (
     <>
