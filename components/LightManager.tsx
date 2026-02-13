@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
 import { SwitchCamera } from 'lucide-react';
+import { useMinions } from '@/components/spirits/MinionContext';
 
 export default function LightManager() {
   const [isRevealed, setIsRevealed] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const { spawnDefenders } = useMinions();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -20,24 +22,34 @@ export default function LightManager() {
 
   useEffect(() => {
     // Set initial size
-    if (typeof window !== 'undefined') {
+    const updateSize = () => {
         setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    }
-
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
 
+    // Defer initial update to satisfy linter
+    const timer = setTimeout(updateSize, 0);
+
+    const handleResize = () => {
+      updateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
 
-    window.addEventListener('resize', handleResize);
     window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [mouseX, mouseY]);
@@ -56,6 +68,16 @@ export default function LightManager() {
     });
   };
 
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Get exact coordinates of the button
+      const rect = e.currentTarget.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Spawn defenders around the switch
+      spawnDefenders(centerX, centerY);
+  };
+
   // Switch Position: Fixed Top-Right (approx 80px from top, 50px from right)
   // Matched with CSS positioning
   const switchX = windowSize.width - 50;
@@ -66,6 +88,7 @@ export default function LightManager() {
       {/* Light Switch Button */}
       <button
         onClick={toggleReveal}
+        onMouseEnter={handleMouseEnter}
         className="fixed top-20 right-4 z-50 p-2 border border-white/20 bg-black text-white hover:bg-white/10 hover:border-white transition-all rounded-sm flex items-center gap-2 group cursor-pointer"
         aria-label="Toggle Global Light"
       >

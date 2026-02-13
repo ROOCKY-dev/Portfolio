@@ -13,7 +13,11 @@ export const OrbContext = createContext<OrbState | undefined>(undefined);
 export const OrbProvider = ({ children }: { children: ReactNode }) => {
   const [errorCount, setErrorCount] = useState(0);
 
-  const status = errorCount < 5 ? 'stable' : errorCount < 10 ? 'warning' : 'critical';
+  // Updated Ranges based on Minion Moods:
+  // 0-20: Stable (Calm)
+  // 21-60: Warning (Working)
+  // 61+: Critical (Panic)
+  const status = errorCount <= 20 ? 'stable' : errorCount <= 60 ? 'warning' : 'critical';
 
   return (
     <OrbContext.Provider value={{

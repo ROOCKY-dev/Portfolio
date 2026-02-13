@@ -1,83 +1,109 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Spirit from './Spirit';
 
 export default function LoadingSequence({ onComplete }: { onComplete: () => void }) {
   const letters = ['L', 'O', 'A', 'D', 'I', 'N', 'G'];
-  // We use stages to control animation variants
-  const [isExiting, setIsExiting] = useState(false);
+  const [stage, setStage] = useState<'entering' | 'cheering' | 'igniting'>('entering');
 
   useEffect(() => {
-    // 1. Start (0s) -> Enter animation runs automatically on mount
+    // Stage 1: Entering (0s - 2.5s) handled by layout animation
 
-    // 2. Trigger Exit after they have arrived and paused (e.g., 3.5s total time)
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, 3500);
+    // Stage 2: Cheer (2.5s)
+    const cheerTimer = setTimeout(() => {
+        setStage('cheering');
+    }, 2800); // Give them a moment to arrive and settle
 
-    // 3. Complete after exit animation finishes (e.g., +2s)
+    // Stage 3: Ignite (4.3s)
+    const igniteTimer = setTimeout(() => {
+        setStage('igniting');
+    }, 4300);
+
+    // Stage 4: Complete (5.0s) - allows white flash to max out
     const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 5500);
+        onComplete();
+    }, 5000);
 
     return () => {
-      clearTimeout(exitTimer);
-      clearTimeout(completeTimer);
+        clearTimeout(cheerTimer);
+        clearTimeout(igniteTimer);
+        clearTimeout(completeTimer);
     };
   }, [onComplete]);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center overflow-hidden"
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
+        className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center overflow-hidden"
+        exit={{ opacity: 0 }} // Fade out the white screen to reveal app
+        transition={{ duration: 1.5, ease: "easeInOut" }}
     >
-      <div className="flex gap-2 sm:gap-4 relative h-32 items-end pb-8">
-        <AnimatePresence>
-        {letters.map((letter, index) => (
-          <motion.div
-            key={index}
-            // Use viewport units for SSR safety
-            initial={{ x: '-100vw' }}
-            animate={{
-              x: isExiting ? '100vw' : 0,
-            }}
-            transition={{
-              duration: 2.5,
-              ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for smooth landing
-              delay: index * 0.1 // Staggered entry
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-                <span className="text-white text-xs font-bold font-mono block mb-1">{letter}</span>
-                <Spirit
-                  color={index % 2 === 0 ? '#00ffff' : '#00ff88'}
-                  // Offset the bounce animation so they wave
-                  delay={index * 0.1}
-                  size={20}
+        {/* Minions Container */}
+        <div className="flex items-end gap-1 sm:gap-2 md:gap-4 relative z-10 pb-10">
+            {letters.map((letter, i) => (
+                <MinionItem
+                    key={i}
+                    letter={letter}
+                    index={i}
+                    stage={stage}
                 />
-            </div>
-          </motion.div>
-        ))}
-        </AnimatePresence>
-      </div>
+            ))}
+        </div>
 
-      {/* Progress Bar */}
-      <motion.div
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 h-1 bg-white/10 rounded-full overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
+        {/* Ignition Flash Overlay */}
         <motion.div
-          className="h-full bg-cyan-500 box-shadow-[0_0_10px_currentColor]"
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 4.5, ease: "linear" }}
+            className="absolute inset-0 bg-white z-20 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: stage === 'igniting' ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: "easeIn" }}
         />
-      </motion.div>
+
+        {/* Loading Bar (Optional context) */}
+        <motion.div
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 w-64 h-1 bg-white/10 rounded-full overflow-hidden z-0"
+            animate={{ opacity: stage === 'igniting' ? 0 : 1 }}
+        >
+             <motion.div
+                className="h-full bg-green-500 shadow-[0_0_10px_#00ff00]"
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 4, ease: "linear" }}
+             />
+        </motion.div>
     </motion.div>
   );
+}
+
+function MinionItem({ letter, index, stage }: { letter: string, index: number, stage: string }) {
+    // Calculate delays for staggered walking start?
+    // Or just all walk together.
+    // "Enter Stage Left" implies they might come in a line.
+
+    const isCheering = stage === 'cheering' || stage === 'igniting';
+
+    return (
+        <motion.div
+            initial={{ x: '-100vw' }}
+            animate={{ x: 0 }}
+            transition={{
+                duration: 2.5,
+                ease: "circOut", // Slow down as they arrive
+                delay: index * 0.15 // Staggered arrival
+            }}
+            className="relative"
+        >
+            <Spirit
+                mood="working" // Green for "building"
+                behavior={isCheering ? 'cheer' : 'carry'}
+                carrying={
+                    <span className="text-xl sm:text-2xl font-black tracking-widest text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">
+                        {letter}
+                    </span>
+                }
+                size={24}
+                delay={index * 0.1} // Staggered animation cycles
+            />
+        </motion.div>
+    );
 }

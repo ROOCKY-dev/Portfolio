@@ -1,12 +1,22 @@
 'use client';
 
 import { useOrb } from './OrbContext';
-import { Settings, X } from 'lucide-react';
+import { useMinions } from '@/components/spirits/MinionContext';
+import { Settings, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function OrbControls() {
   const { errorCount, setErrorCount, status } = useOrb();
+  const { clearMinions } = useMinions();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleClear = () => {
+      clearMinions();
+      // Wait for cheer animation before resetting
+      setTimeout(() => {
+          setErrorCount(0);
+      }, 1500);
+  };
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end font-mono">
@@ -31,7 +41,7 @@ export default function OrbControls() {
                     <input
                         type="range"
                         min="0"
-                        max="20"
+                        max="100"
                         value={errorCount}
                         onChange={(e) => setErrorCount(Number(e.target.value))}
                         className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-110 transition-all"
@@ -42,12 +52,22 @@ export default function OrbControls() {
                     <span className="text-white/50 uppercase">System Status</span>
                     <span className={`font-bold uppercase tracking-wider ${
                         status === 'stable' ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]' :
-                        status === 'warning' ? 'text-orange-400 drop-shadow-[0_0_5px_rgba(255,165,0,0.5)]' :
+                        status === 'warning' ? 'text-green-400 drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]' :
                         'text-red-500 drop-shadow-[0_0_5px_rgba(255,0,0,0.5)]'
                     }`}>
-                        {status}
+                        {status === 'stable' ? 'IDLE' : status === 'warning' ? 'WORKING' : 'CRITICAL'}
                     </span>
                 </div>
+
+                {/* Clear Console Button */}
+                <button
+                    onClick={handleClear}
+                    disabled={errorCount === 0}
+                    className="w-full py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                >
+                    <Trash2 size={12} />
+                    Clear Console
+                </button>
             </div>
         </div>
       )}
