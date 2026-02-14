@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { Sparkles, Float } from '@react-three/drei';
 
 export default function OrbScene() {
-  const { errorCount, status } = useOrb();
+  const { errorCount, status, activity, customColor, customSpeed } = useOrb();
   const groupRef = useRef<THREE.Group>(null);
   const coreRef = useRef<THREE.Mesh>(null);
   const shellRef = useRef<THREE.Mesh>(null);
@@ -26,19 +26,75 @@ export default function OrbScene() {
   const isPulsing = useRef(false);
 
   useEffect(() => {
-    // Set targets based on status/errorCount
-    if (status === 'stable') targetColor.current.set('#00ffff'); // Cyan
-    else if (status === 'warning') targetColor.current.set('#ffaa00'); // Orange/Amber
-    else targetColor.current.set('#ff0000'); // Red
+    // Determine target values based on Activity & Status
+    let baseColor = '#00ffff';
+    let baseSpeed = 0.2;
+    let baseIntensity = 3.0;
 
-    targetSpeed.current = 0.2 + (errorCount * 0.02); // Slower base speed
-    targetIntensity.current = 3.0 + (errorCount * 0.1);
+    switch (activity) {
+      case 'coding':
+        // Coding: Color/Speed changes based on Error Count (Status)
+        if (status === 'stable') {
+           baseColor = '#00ffff'; // Cyan (Calm)
+           baseSpeed = 0.2 + (errorCount * 0.01);
+           baseIntensity = 3.0;
+        } else if (status === 'warning') {
+           baseColor = '#0088ff'; // Deep Blue (Focused)
+           baseSpeed = 0.6 + (errorCount * 0.02);
+           baseIntensity = 4.0;
+        } else { // critical
+           baseColor = '#ffffff'; // White Hot (Hyper Focused/Panic)
+           baseSpeed = 1.5 + (errorCount * 0.05);
+           baseIntensity = 6.0;
+        }
+        break;
 
-    // Trigger Pulse
+      case 'browsing':
+        baseColor = '#dddddd'; // Soft White
+        baseSpeed = 0.4;
+        baseIntensity = 2.5;
+        break;
+
+      case 'email':
+        baseColor = '#ffaa00'; // Amber
+        baseSpeed = 0.5;
+        baseIntensity = 3.0;
+        break;
+
+      case 'discord':
+        baseColor = '#5865F2'; // Blurple
+        baseSpeed = 0.8; // Chaotic/Active
+        baseIntensity = 3.5;
+        break;
+
+      case 'chill':
+        baseColor = '#a020f0'; // Purple
+        baseSpeed = 0.15; // Slow
+        baseIntensity = 2.0;
+        break;
+
+      case 'offline':
+        baseColor = '#333333'; // Dim Grey
+        baseSpeed = 0.05; // Almost static
+        baseIntensity = 0.5;
+        break;
+
+      case 'custom':
+        baseColor = customColor;
+        baseSpeed = customSpeed;
+        baseIntensity = 3.0;
+        break;
+    }
+
+    targetColor.current.set(baseColor);
+    targetSpeed.current = baseSpeed;
+    targetIntensity.current = baseIntensity;
+
+    // Trigger Pulse on Status/Activity Change
     isPulsing.current = true;
-    pulseTime.current = 0; // Reset pulse timer
+    pulseTime.current = 0;
 
-  }, [status, errorCount]);
+  }, [status, errorCount, activity, customColor, customSpeed]);
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
@@ -51,8 +107,11 @@ export default function OrbScene() {
 
     // 2. Rotate Group
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * currentSpeed.current * 0.2; // Slower rotation
-      groupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1; // Very gentle sway
+      groupRef.current.rotation.y += delta * currentSpeed.current * 0.5;
+
+      // Add some jitter for high intensity states
+      const jitter = currentIntensity.current > 4.0 ? (Math.random() - 0.5) * 0.02 : 0;
+      groupRef.current.rotation.x = (Math.sin(time * 0.3) * 0.1) + jitter;
     }
 
     // 3. Update Core
@@ -60,10 +119,13 @@ export default function OrbScene() {
         const material = coreRef.current.material as THREE.MeshStandardMaterial;
         material.color.copy(currentColor.current);
         material.emissive.copy(currentColor.current);
-        material.emissiveIntensity = currentIntensity.current + Math.sin(time * 2) * 0.3; // Breathing
 
-        // Base Scale
-        const baseScale = 1 + Math.sin(time * 1.5) * 0.02;
+        // Breathing effect based on speed
+        const breathSpeed = currentSpeed.current * 2;
+        material.emissiveIntensity = currentIntensity.current + Math.sin(time * breathSpeed) * (currentIntensity.current * 0.1);
+
+        // Base Scale Pulse
+        const baseScale = 1 + Math.sin(time * breathSpeed * 0.5) * 0.02;
         coreRef.current.scale.set(baseScale, baseScale, baseScale);
     }
 
