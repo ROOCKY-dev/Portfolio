@@ -1,20 +1,15 @@
 'use client';
 
 import { useOrb } from './OrbContext';
-// import { useMinions } from '@/components/spirits/MinionContext';
 import { Settings, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function OrbControls() {
   const { errorCount, setErrorCount, status } = useOrb();
-  // const { clearMinions } = useMinions();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClear = () => {
-      // clearMinions();
-      setTimeout(() => {
-          setErrorCount(0);
-      }, 500); // Faster reset since no animation
+      setErrorCount(0);
   };
 
   return (
