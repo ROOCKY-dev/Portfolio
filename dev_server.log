@@ -9,3 +9,6 @@
 ✓ Starting...
 ✓ Ready in 1472ms
  GET / 200 in 2.6s (compile: 2.0s, render: 526ms)
+○ Compiling /_not-found/page ...
+ GET / 404 in 6.3s (compile: 5.2s, render: 1188ms)
+[?25h
