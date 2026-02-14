@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 // Dynamically import StatusOrb to avoid SSR issues with R3F
 const StatusOrb = dynamic(() => import('@/components/orb/StatusOrb'), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-black/50 animate-pulse" />
+  loading: () => <div className="w-full h-full bg-black/50 animate-pulse rounded-full" />
 });
 
 export default function Header() {
@@ -30,18 +30,18 @@ export default function Header() {
     <header className="fixed top-0 left-0 w-full flex items-start justify-between p-6 sm:p-8 z-30 pointer-events-none font-mono text-xs">
 
       {/* Left: Orb + Identity & Mission */}
-      <div className="flex items-start gap-4 mt-8 ml-4 sm:mt-12 sm:ml-12 pointer-events-auto">
-        {/* Orb Container */}
-        <div className="w-32 h-32 md:w-64 md:h-64 flex-shrink-0 relative">
+      <div className="flex items-center gap-6 mt-4 ml-2 sm:mt-8 sm:ml-8 pointer-events-auto">
+        {/* Orb Container - Sized to be prominent but aligned */}
+        <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 relative flex items-center justify-center">
            <StatusOrb />
         </div>
 
         {/* Identity Panel */}
-        <div className="flex flex-col gap-4 backdrop-blur-[2px] rounded-lg p-4 bg-black/10 border border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] max-w-sm">
+        <div className="flex flex-col gap-3 backdrop-blur-[2px] rounded-lg p-4 bg-black/10 border border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)] max-w-sm">
 
             {/* Identity */}
             <div className="flex flex-col">
-                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Identity</span>
+                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-0.5">Identity</span>
                 <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md">
                     ROOCKYdev
                 </h1>
@@ -49,7 +49,7 @@ export default function Header() {
 
             {/* Status */}
             <div className="flex flex-col">
-                 <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Status</span>
+                 <span className="text-[10px] text-white/40 uppercase tracking-widest mb-0.5">Status</span>
                  <div className="flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${dotColor[status]} ${status === 'critical' ? 'animate-pulse' : ''} shadow-[0_0_8px_currentColor]`} />
                     <span className="text-white/90 font-medium">Building Digital Ecosystems</span>
@@ -58,14 +58,14 @@ export default function Header() {
 
             {/* Mission */}
             <div className="flex flex-col">
-                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1">Mission</span>
+                <span className="text-[10px] text-white/40 uppercase tracking-widest mb-0.5">Mission</span>
                 <span className="text-cyan-400/90 font-medium">Scholarship Candidate (NL/DE/CN)</span>
             </div>
         </div>
       </div>
 
       {/* Right: Technical Metrics (Kept minimal) */}
-          <div className="flex flex-col items-end gap-4 pointer-events-auto text-[10px] text-white/30 hidden sm:flex">
+          <div className="flex flex-col items-end gap-4 pointer-events-auto text-[10px] text-white/30 hidden sm:flex mt-4 mr-2">
 
              {/* The Forbidden Light Switch */}
              <motion.button

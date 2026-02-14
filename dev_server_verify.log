@@ -7,3 +7,4 @@ $ next dev
 ✓ Ready in 1915ms
 ○ Compiling / ...
  GET / 200 in 9.7s (compile: 9.2s, render: 484ms)
+[?25h

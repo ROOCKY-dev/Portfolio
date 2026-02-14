@@ -9,8 +9,12 @@ import { Sparkles, Float } from '@react-three/drei';
 export default function OrbScene() {
   const { errorCount, status } = useOrb();
   const groupRef = useRef<THREE.Group>(null);
+
+  // Refs for core and rings
   const coreRef = useRef<THREE.Mesh>(null);
-  const shellRef = useRef<THREE.Mesh>(null);
+  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
+  const ring3Ref = useRef<THREE.Mesh>(null);
   const shockwaveRef = useRef<THREE.Mesh>(null);
 
   // Refs for State (avoid re-renders)
@@ -31,28 +35,29 @@ export default function OrbScene() {
     else if (status === 'warning') targetColor.current.set('#ffaa00'); // Orange/Amber
     else targetColor.current.set('#ff0000'); // Red
 
-    targetSpeed.current = 0.2 + (errorCount * 0.02); // Slower base speed
-    targetIntensity.current = 3.0 + (errorCount * 0.1);
+    targetSpeed.current = 0.5 + (errorCount * 0.05); // Faster base speed
+    targetIntensity.current = 2.0 + (errorCount * 0.2);
 
     // Trigger Pulse
-    isPulsing.current = true;
-    pulseTime.current = 0; // Reset pulse timer
+    if (status !== 'stable') {
+        isPulsing.current = true;
+        pulseTime.current = 0; // Reset pulse timer
+    }
 
   }, [status, errorCount]);
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
 
-    // 1. Lerp Values - Slower transitions (2-3s)
-    // Lerp factor of 0.8 * delta provides a smooth, slow drift
-    currentColor.current.lerp(targetColor.current, delta * 0.8);
+    // 1. Lerp Values
+    currentColor.current.lerp(targetColor.current, delta * 2.0);
     currentSpeed.current = THREE.MathUtils.lerp(currentSpeed.current, targetSpeed.current, delta * 0.5);
     currentIntensity.current = THREE.MathUtils.lerp(currentIntensity.current, targetIntensity.current, delta * 0.8);
 
-    // 2. Rotate Group
+    // 2. Rotate Group (General drift)
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * currentSpeed.current * 0.2; // Slower rotation
-      groupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1; // Very gentle sway
+      groupRef.current.rotation.y += delta * 0.1;
+      groupRef.current.rotation.z = Math.sin(time * 0.2) * 0.1;
     }
 
     // 3. Update Core
@@ -60,34 +65,49 @@ export default function OrbScene() {
         const material = coreRef.current.material as THREE.MeshStandardMaterial;
         material.color.copy(currentColor.current);
         material.emissive.copy(currentColor.current);
-        material.emissiveIntensity = currentIntensity.current + Math.sin(time * 2) * 0.3; // Breathing
+        material.emissiveIntensity = currentIntensity.current + Math.sin(time * 3) * 0.5; // Breathing
 
-        // Base Scale
-        const baseScale = 1 + Math.sin(time * 1.5) * 0.02;
+        // Base Scale Pulse
+        const baseScale = 1 + Math.sin(time * 2) * 0.05;
         coreRef.current.scale.set(baseScale, baseScale, baseScale);
     }
 
-    // 4. Update Shell
-    if (shellRef.current) {
-        const material = shellRef.current.material as THREE.MeshBasicMaterial;
+    // 4. Update Rings (Atom Effect)
+    const ringSpeed = currentSpeed.current * 2.0;
+
+    if (ring1Ref.current) {
+        const material = ring1Ref.current.material as THREE.MeshBasicMaterial;
         material.color.copy(currentColor.current);
-        shellRef.current.rotation.y -= delta * 0.1;
-        shellRef.current.rotation.z += delta * 0.05;
+        ring1Ref.current.rotation.x += delta * ringSpeed;
+        ring1Ref.current.rotation.y += delta * ringSpeed * 0.5;
     }
+    if (ring2Ref.current) {
+        const material = ring2Ref.current.material as THREE.MeshBasicMaterial;
+        material.color.copy(currentColor.current);
+        ring2Ref.current.rotation.y += delta * ringSpeed;
+        ring2Ref.current.rotation.z += delta * ringSpeed * 0.5;
+    }
+    if (ring3Ref.current) {
+        const material = ring3Ref.current.material as THREE.MeshBasicMaterial;
+        material.color.copy(currentColor.current);
+        ring3Ref.current.rotation.z += delta * ringSpeed;
+        ring3Ref.current.rotation.x += delta * ringSpeed * 0.5;
+    }
+
 
     // 5. Update Shockwave
     if (shockwaveRef.current) {
         if (isPulsing.current) {
-            pulseTime.current += delta * 1.5; // Speed of expansion
+            pulseTime.current += delta * 2.0; // Speed of expansion
 
             if (pulseTime.current < 2.0) {
-                const scale = 1 + (pulseTime.current * 2); // Expand to 3x radius
+                const scale = 1 + (pulseTime.current * 3); // Expand
                 shockwaveRef.current.scale.set(scale, scale, scale);
 
                 const material = shockwaveRef.current.material as THREE.MeshBasicMaterial;
                 material.color.copy(currentColor.current);
                 // Fade out: 1 -> 0
-                material.opacity = Math.max(0, 1 - (pulseTime.current / 2));
+                material.opacity = Math.max(0, 0.5 - (pulseTime.current * 0.25));
                 shockwaveRef.current.visible = true;
             } else {
                 isPulsing.current = false;
@@ -100,59 +120,73 @@ export default function OrbScene() {
   });
 
   return (
-    <group ref={groupRef} scale={1.0}>
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-          {/* Volumetric Core */}
+    <group ref={groupRef} scale={0.6}> {/* Adjust scale to fit well in header box */}
+      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+          {/* Glowing Core */}
           <mesh ref={coreRef}>
-            <sphereGeometry args={[0.8, 64, 64]} /> {/* High poly core */}
+            <sphereGeometry args={[1, 64, 64]} />
             <meshStandardMaterial
               toneMapped={false}
               transparent
               opacity={0.9}
-              roughness={0.3}
-              metalness={0.9}
+              roughness={0.2}
+              metalness={0.8}
             />
           </mesh>
 
-          {/* Outer Wireframe Shell */}
-          <mesh ref={shellRef} scale={1.3}>
-            <icosahedronGeometry args={[1, 4]} /> {/* High detail shell */}
-            <meshBasicMaterial
-                wireframe
-                transparent
-                opacity={0.15}
-                side={THREE.DoubleSide}
-                blending={THREE.AdditiveBlending}
-            />
-          </mesh>
+          {/* Atom Rings */}
+          {/* Ring 1 - Horizontalish */}
+          <group rotation={[Math.PI / 3, 0, 0]}>
+            <mesh ref={ring1Ref}>
+                <torusGeometry args={[3, 0.02, 16, 100]} />
+                <meshBasicMaterial transparent opacity={0.6} side={THREE.DoubleSide} toneMapped={false} />
+            </mesh>
+          </group>
+
+          {/* Ring 2 - Verticalish */}
+          <group rotation={[0, Math.PI / 3, 0]}>
+             <mesh ref={ring2Ref}>
+                <torusGeometry args={[3, 0.02, 16, 100]} />
+                <meshBasicMaterial transparent opacity={0.6} side={THREE.DoubleSide} toneMapped={false} />
+             </mesh>
+          </group>
+
+          {/* Ring 3 - Diagonal */}
+          <group rotation={[0, 0, Math.PI / 3]}>
+             <mesh ref={ring3Ref}>
+                <torusGeometry args={[3, 0.02, 16, 100]} />
+                <meshBasicMaterial transparent opacity={0.6} side={THREE.DoubleSide} toneMapped={false} />
+             </mesh>
+          </group>
+
 
            {/* Shockwave Ring (Pulse Effect) */}
            <mesh ref={shockwaveRef} visible={false}>
-              {/* Use a ring geometry that faces the camera or rotates with group */}
-              <ringGeometry args={[0.9, 1.0, 64]} />
+              <ringGeometry args={[1.2, 1.4, 64]} />
               <meshBasicMaterial
                 transparent
                 opacity={0}
                 side={THREE.DoubleSide}
                 blending={THREE.AdditiveBlending}
+                toneMapped={false}
               />
            </mesh>
 
           {/* Orbiting Particles */}
           <Sparkles
-            count={120}
-            scale={6}
-            size={6}
-            speed={0.2}
-            opacity={0.6}
+            count={80}
+            scale={8}
+            size={4}
+            speed={0.4}
+            opacity={0.5}
             color="#ffffff"
           />
       </Float>
 
-      {/* Cinematic Lighting */}
-      <ambientLight intensity={0.1} />
-      <pointLight position={[10, 10, 10]} intensity={4} color="#ffffff" distance={20} decay={2} />
-      <pointLight position={[-10, -10, -10]} intensity={2} color="#0000ff" distance={20} decay={2} />
+      {/* Lighting */}
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" distance={20} />
+      <pointLight position={[-10, -10, -10]} intensity={1} color="#0000ff" distance={20} />
     </group>
   );
 }
