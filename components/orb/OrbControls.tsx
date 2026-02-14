@@ -1,11 +1,18 @@
 'use client';
 
-import { useOrb } from './OrbContext';
+import { useOrb, Activity } from './OrbContext';
 import { Settings, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
+const activities: Activity[] = ['coding', 'browsing', 'email', 'discord', 'chill', 'offline', 'custom'];
+
 export default function OrbControls() {
-  const { errorCount, setErrorCount, status } = useOrb();
+  const {
+    errorCount, setErrorCount, status,
+    activity, setActivity,
+    customColor, setCustomColor,
+    customSpeed, setCustomSpeed
+  } = useOrb();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClear = () => {
@@ -27,6 +34,61 @@ export default function OrbControls() {
             </div>
 
             <div className="space-y-4">
+
+                {/* Activity Selector */}
+                <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-2">Activity</label>
+                    <div className="grid grid-cols-2 gap-1">
+                        {activities.map((act) => (
+                            <button
+                                key={act}
+                                onClick={() => setActivity(act)}
+                                className={`text-[9px] uppercase border px-2 py-1 rounded transition-colors ${
+                                    activity === act
+                                    ? 'bg-white text-black border-white'
+                                    : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
+                                }`}
+                            >
+                                {act}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Custom Controls (Conditional) */}
+                {activity === 'custom' && (
+                    <div className="p-2 bg-white/5 rounded border border-white/10 space-y-2">
+                        <div>
+                            <label className="text-[10px] uppercase text-white/50 block mb-1 flex justify-between">
+                                <span>Color</span>
+                                <span className="text-white">{customColor}</span>
+                            </label>
+                            <input
+                                type="color"
+                                value={customColor}
+                                onChange={(e) => setCustomColor(e.target.value)}
+                                className="w-full h-6 rounded cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] uppercase text-white/50 block mb-1 flex justify-between">
+                                <span>Speed</span>
+                                <span className="text-white">{customSpeed.toFixed(1)}</span>
+                            </label>
+                            <input
+                                type="range"
+                                min="0.1"
+                                max="5.0"
+                                step="0.1"
+                                value={customSpeed}
+                                onChange={(e) => setCustomSpeed(parseFloat(e.target.value))}
+                                className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-110 transition-all"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Error Count Slider */}
                 <div>
                     <label className="text-[10px] uppercase text-white/50 block mb-2 flex justify-between">
                       <span>Error Count</span>
@@ -42,6 +104,7 @@ export default function OrbControls() {
                     />
                 </div>
 
+                {/* Status Indicator */}
                 <div className="flex justify-between items-center text-[10px]">
                     <span className="text-white/50 uppercase">System Status</span>
                     <span className={`font-bold uppercase tracking-wider ${
