@@ -100,7 +100,7 @@ export default function OrbScene() {
   });
 
   return (
-    <group ref={groupRef} scale={6.5}> {/* Significantly Larger Scale */}
+    <group ref={groupRef} scale={1.5}>
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
           {/* Volumetric Core */}
           <mesh ref={coreRef}>
