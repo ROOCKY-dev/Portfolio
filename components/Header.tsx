@@ -32,7 +32,7 @@ export default function Header() {
       {/* Left: Orb + Identity & Mission */}
       <div className="flex items-start gap-4 mt-8 ml-4 sm:mt-12 sm:ml-12 pointer-events-auto">
         {/* Orb Container */}
-        <div className="w-24 h-24 flex-shrink-0 relative">
+        <div className="w-32 h-32 md:w-64 md:h-64 flex-shrink-0 relative">
            <StatusOrb />
         </div>
 
