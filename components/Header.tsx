@@ -3,7 +3,6 @@
 import { Activity, AlertTriangle, Terminal, Cpu, Sun } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useOrb } from '@/components/orb/OrbContext';
-import { useMinions } from '@/components/spirits/MinionContext';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -15,12 +14,7 @@ const StatusOrb = dynamic(() => import('@/components/orb/StatusOrb'), {
 
 export default function Header() {
   const { status, errorCount } = useOrb();
-  const { spawnDefenders } = useMinions();
   const [shake, setShake] = useState(0);
-
-  const handleLightHover = (e: React.MouseEvent) => {
-      spawnDefenders(e.clientX, e.clientY);
-  };
 
   const handleLightClick = () => {
       setShake(prev => prev + 1);
@@ -88,7 +82,6 @@ export default function Header() {
 
              {/* The Forbidden Light Switch */}
              <motion.button
-                onMouseEnter={handleLightHover}
                 onClick={handleLightClick}
                 animate={{ x: shake % 2 === 0 ? [0, -5, 5, -5, 5, 0] : [0, 5, -5, 5, -5, 0] }}
                 key={shake} // Re-trigger animation on click
